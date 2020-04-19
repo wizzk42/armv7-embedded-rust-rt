@@ -1,0 +1,3 @@
+//! macros
+//! provides: utility macros
+

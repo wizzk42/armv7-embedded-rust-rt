@@ -1,0 +1,70 @@
+/* Memory layout of the LM3S6965 microcontroller */
+/* 1K = 1 KiBi = 1024 bytes */
+MEMORY
+{
+  FLASH : ORIGIN = 0x00000000, LENGTH = 256K
+  RAM : ORIGIN = 0x20000000, LENGTH = 64K
+}
+
+/* The entry point is the reset handler */
+ENTRY(reset);
+EXTERN(__RESET_VECTOR);
+
+/* Exception Handlers */
+EXTERN(__EXCEPTIONS);
+
+SECTIONS
+{
+  .vector_table ORIGIN(FLASH) :
+  {
+    /* 1. initial Stack Pointer value */
+    LONG(ORIGIN(RAM) + LENGTH(RAM));
+
+    /* 2. reset vector */
+    KEEP(*(.vector_table.reset_vector));
+
+    /* 3. exception handlers */
+    KEEP(*(.vector_table.exceptions));
+  } > FLASH
+
+  .text :
+  {
+    *(.text .text.*);
+  } > FLASH
+
+  .rodata :
+  {
+    *(.rodata .rodata.*);
+  } > FLASH
+
+  .bss :
+  {
+    _SBSS = .;
+    *(.bss .bss.*);
+    _EBSS = .;
+  } > RAM
+
+  .data : AT(ADDR(.rodata) + SIZEOF(.rodata))
+  {
+    _SDATA = .;
+    *(.data .data.*);
+    _EDATA = .;
+  } > RAM
+
+  _SIDATA = LOADADDR(.data);
+
+  /DISCARD/ :
+  {
+    *(.ARM.exidx .ARM.exidx.*);
+  }
+}
+
+/* PROVIDE exception handlers */
+PROVIDE(nmi = default_exception_handler);
+PROVIDE(hard_fault = __hard_fault_trampoline);
+PROVIDE(mem_manage = default_exception_handler);
+PROVIDE(bus_fault = default_exception_handler);
+PROVIDE(usage_fault = default_exception_handler);
+PROVIDE(sv_call = default_exception_handler);
+PROVIDE(pend_sv = default_exception_handler);
+PROVIDE(sys_tick = default_exception_handler);

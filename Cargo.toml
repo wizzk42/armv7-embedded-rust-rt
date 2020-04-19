@@ -1,0 +1,14 @@
+[package]
+name = "rt"
+categories = ["embedded", "no-std"]
+description = "Minimal runtime for ARM Cortex-M series microcontrollers"
+keywords = ["arm", "cortex-m", "runtime"]
+version = "0.1.0"
+authors = ["Matthias Muenzner <matthias.muenzner@jkaref.com>"]
+edition = "2018"
+
+[build-dependencies]
+cc = { version = "1.0.25", features = [] }
+
+[dependencies]
+bare-metal = { version = "0.2.5", features = [ "const-fn" ] }
