@@ -1,16 +1,26 @@
 //! interrupts.rs
 //! provides: interrupt routines
 
-pub use bare_metal::{CriticalSection, Mutex, Nr};
+pub use bare_metal::{CriticalSection, Mutex};
 
-/// Disables all interrupts
+#[doc(hidden)]
+extern "C" {
+    fn __irq_handler_trampoline();
+}
+
+#[doc(hidden)]
+#[link_section = ".vector_table.interrupts"]
+#[no_mangle]
+pub static mut __INTERRUPTS: [unsafe extern "C" fn(); 240] = [{
+    __irq_handler_trampoline
+}; 240];
+
 #[inline]
 pub fn disable() {
     extern "C" {
         fn __cpsid();
     }
 
-    // XXX do we need a explicit compiler barrier here?
     unsafe { __cpsid(); }
 }
 
@@ -20,7 +30,6 @@ pub unsafe fn enable() {
         fn __cpsie();
     }
 
-    // XXX do we need a explicit compiler barrier here?
     __cpsie();
 }
 
@@ -40,4 +49,9 @@ pub fn free<F, R>(f: F) -> R
     }
 
     r
+}
+
+#[no_mangle]
+pub extern "C" fn irq_handler(_irq: u8) {
+    /* do nothing */
 }

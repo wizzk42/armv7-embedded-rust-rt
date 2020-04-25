@@ -29,6 +29,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         .compile("hard_fault_trampoline");
     println!("cargo:rerun-if-changed=asm/hard_fault_trampoline.s");
 
+    Build::new().file("asm/irq_handler_trampoline.s")
+        .compile("irq_handler_trampoline");
+    println!("cargo:rerun-if-changed=asm/irq_handler_trampoline.s");
+
     Build::new().file("asm/primask_read.s")
         .compile("primask");
     println!("cargo:rerun-if-changed=asm/primask_read.s");

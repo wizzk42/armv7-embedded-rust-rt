@@ -9,7 +9,7 @@ use core::ptr;
 /// # Safety
 ///     bootstrap routine to initialize memory and run main
 #[no_mangle]
-pub unsafe extern "C" fn reset() -> ! {
+pub unsafe extern "C" fn __reset() -> ! {
 
     extern "C" {
         static mut _SBSS: u8;
@@ -49,7 +49,7 @@ pub unsafe extern "C" fn reset() -> ! {
 ///
 #[link_section = ".vector_table.reset_vector"]
 #[no_mangle]
-pub static __RESET_VECTOR: unsafe extern "C" fn() -> ! = reset;
+pub static __RESET_VECTOR: unsafe extern "C" fn() -> ! = __reset;
 
 /// entry macro
 ///     A macro to set a function as the main entry point to

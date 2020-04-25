@@ -7,7 +7,7 @@ MEMORY
 }
 
 /* The entry point is the reset handler */
-ENTRY(reset);
+ENTRY(__reset);
 EXTERN(__RESET_VECTOR);
 
 /* Exception Handlers */
@@ -25,9 +25,12 @@ SECTIONS
 
     /* 3. exception handlers */
     KEEP(*(.vector_table.exceptions));
+
+    /* 4. interrupt handlers */
+    KEEP(*(.vector_table.interrupts));
   } > FLASH
 
-  .text :
+  .text : ALIGN(4)
   {
     *(.text .text.*);
   } > FLASH
@@ -66,5 +69,7 @@ PROVIDE(mem_manage = default_exception_handler);
 PROVIDE(bus_fault = default_exception_handler);
 PROVIDE(usage_fault = default_exception_handler);
 PROVIDE(sv_call = default_exception_handler);
+PROVIDE(debug_monitor = default_exception_handler);
 PROVIDE(pend_sv = default_exception_handler);
 PROVIDE(sys_tick = default_exception_handler);
+PROVIDE(irq_handler = __irq_handler_trampoline);
