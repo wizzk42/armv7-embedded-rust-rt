@@ -35,7 +35,7 @@ pub fn read() -> Primask {
 
     let r = unsafe { __primask() };
 
-    if r & (1 << 0) == (1 << 0) {
+    if r & 1 == 1 {
         Primask::Inactive
     } else {
         Primask::Active
