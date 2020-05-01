@@ -15,6 +15,7 @@ pub static mut __INTERRUPTS: [unsafe extern "C" fn(); 240] = [{
     __irq_handler_trampoline
 }; 240];
 
+#[doc(hidden)]
 #[inline]
 pub fn disable() {
     extern "C" {
@@ -24,6 +25,7 @@ pub fn disable() {
     unsafe { __cpsid(); }
 }
 
+#[doc(hidden)]
 #[inline]
 pub unsafe fn enable() {
     extern "C" {
@@ -53,5 +55,5 @@ pub fn free<F, R>(f: F) -> R
 
 #[no_mangle]
 pub extern "C" fn irq_handler(_irq: u8) {
-    /* do nothing */
+
 }
