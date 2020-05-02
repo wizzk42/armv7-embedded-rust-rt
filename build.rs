@@ -143,17 +143,18 @@ fn link<'a>(_device: &'a Device, _out: &PathBuf) -> Result<(), Box<dyn Error>> {
             format!("devices/{0}", _desc.name.to_string())
         ) {
             for file in all_files_iter {
+                let ref path = file?.path();
                 let _ = f.write(
-                    fs::read(
-                        file?.path()
-                    )
+                    fs::read(path)
                         .expect("file is not available")
                         .as_ref()
                 ).expect("could not be written");
+
+                println!("cargo:rerun-if-changed={:?}", path);
             }
         }
         let _ = f.write(
-            include_bytes!("scripts/linker/link.x.in")
+            include_bytes!("devices/common/link.x.in")
         ).expect("linker script template");
 
         Ok(())
@@ -170,7 +171,7 @@ fn link<'a>(_device: &'a Device, _out: &PathBuf) -> Result<(), Box<dyn Error>> {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let out = PathBuf::from(
-        env::var_os("OUT_DIR").unwrap_or_default()
+        env::var_os("OUT").unwrap_or_default()
     );
 
     let device = Device::from_str(
