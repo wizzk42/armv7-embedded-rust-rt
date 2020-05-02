@@ -93,25 +93,16 @@ impl Display for Target<'_> {
 
 fn assemble<'a>(_device: &'a Device, _out: &PathBuf) -> Result<(), Box<dyn Error>> {
     fn _prepare<'b>(_desc: &'b Description, _out: &PathBuf) -> Result<(), Box<dyn Error>> {
-        let mut f: File = File::create(_out.join("arm.s"))?;
+        let mut f: File = File::create(_out.join("arm.s"))
+            .expect("could not create assembly file");
 
-        if let Ok(custom_files_iter) = fs::read_dir(
-            format!("asm/{0}", _desc.name)
-        ) {
-            for file in custom_files_iter {
-                let _ = f.write(fs::read(file?.path())?.as_ref())?;
-            }
-        }
+        attach(&mut f, format!("asm/{0}", _desc.name).as_str())
+            .expect("cannot attach common assembly code");
 
-        if let Ok(common_files_iter) = match _desc.target {
+        match _desc.target {
             Target::ARM { class, .. } => {
-                fs::read_dir(
-                    format!("asm/{0}", class)
-                )
-            }
-        } {
-            for file in common_files_iter {
-                let _ = f.write(fs::read(file?.path())?.as_ref())?;
+                attach(&mut f, format!("asm/{0}", class).as_str())
+                    .expect("cannot attach device specific assembly code");
             }
         };
 
@@ -135,27 +126,19 @@ fn assemble<'a>(_device: &'a Device, _out: &PathBuf) -> Result<(), Box<dyn Error
 
 fn link<'a>(_device: &'a Device, _out: &PathBuf) -> Result<(), Box<dyn Error>> {
     fn _prepare<'b>(_desc: &'b Description, _out: &PathBuf) -> Result<(), Box<dyn Error>> {
-        let mut f: File = File::create(
-            _out.join("link.x")
-        ).expect("unable to create link.x script");
+        let mut f: File = File::create(_out.join("link.x"))
+            .expect("unable to create link.x script");
 
-        if let Ok(all_files_iter) = fs::read_dir(
-            format!("devices/{0}", _desc.name.to_string())
-        ) {
-            for file in all_files_iter {
-                let ref path = file?.path();
-                let _ = f.write(
-                    fs::read(path)
-                        .expect("file is not available")
-                        .as_ref()
-                ).expect("could not be written");
+        let _ = f.write(include_bytes!("devices/templates/header.x"))
+            .expect("header not found");
 
-                println!("cargo:rerun-if-changed={:?}", path);
-            }
-        }
-        let _ = f.write(
-            include_bytes!("devices/common/link.x.in")
-        ).expect("linker script template");
+        attach(&mut f, format!("devices/{0}", _desc.name.to_string()).as_str())
+            .expect("cannot attach device specific link script items");
+        attach(&mut f, "devices/common")
+            .expect("cannot attach common link script items");
+
+        let _ = f.write(include_bytes!("devices/templates/footer.x"))
+            .expect("footer not found");
 
         Ok(())
     }
@@ -171,7 +154,7 @@ fn link<'a>(_device: &'a Device, _out: &PathBuf) -> Result<(), Box<dyn Error>> {
 
 fn main() -> Result<(), Box<dyn Error>> {
     let out = PathBuf::from(
-        env::var_os("OUT").unwrap_or_default()
+        env::var_os("OUT_DIR").unwrap_or_default()
     );
 
     let device = Device::from_str(
@@ -189,8 +172,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     println!("cargo:rustc-link-search={0}", out.display());
     println!("cargo:rerun-if-changed=build.rs");
 
-    assemble(&device, &out)?;
-    link(&device, &out)?;
+    assemble(&device, &out)
+        .expect("FAILED: assembly step");
+    link(&device, &out)
+        .expect("FAILED: link script step");
 
     Ok(())
 }
@@ -200,4 +185,21 @@ fn has_fpu(_device: &Device) {
         Device::KNOWN(desc) if desc.fpu => println!("cargo:rustc-cfg=has_fpu"),
         _ => {}
     }
+}
+
+/// Attaches contents of files in _path to _f
+fn attach(_f: &mut File, _path: &str) -> Result<(), Box<dyn Error>> {
+    if let Ok(files_iter) = fs::read_dir(_path) {
+        for file in files_iter {
+            let ref p = file?.path();
+            let _ = _f.write(
+                fs::read(p)
+                    .expect("file is not available")
+                    .as_ref()
+            ).expect("could not be written");
+
+            println!("cargo:rerun-if-changed={:?}", p);
+        }
+    }
+    Ok(())
 }

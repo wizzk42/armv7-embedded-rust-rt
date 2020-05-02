@@ -6,9 +6,7 @@
 #[allow(clippy::missing_inline_in_public_items)]
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Primask {
-    /// Active
     Active,
-    /// Inactive
     Inactive,
 }
 

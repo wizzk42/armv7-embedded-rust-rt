@@ -12,3 +12,8 @@ cc = { version = "1.0.25", features = [] }
 
 [dependencies]
 bare-metal = { version = "0.2.5", features = [ "const-fn" ] }
+
+[features]
+device = []
+
+[badges]
