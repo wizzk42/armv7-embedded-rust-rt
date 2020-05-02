@@ -1,1 +1,3 @@
-see https://github.com:wizzk42/armv7-embedded-rust[main project]
+image:https://travis-ci.com/wizzk42/armv7-embedded-rust-rt.svg?branch=master["Build Status", link="https://travis-ci.com/wizzk42/armv7-embedded-rust-rt"]
+
+see https://github.com/wizzk42/armv7-embedded-rust[main project]
