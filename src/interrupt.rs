@@ -53,7 +53,6 @@ pub fn free<F, R>(f: F) -> R
     r
 }
 
+/// default interrupt handler: empty
 #[no_mangle]
-pub extern "C" fn irq_handler(_irq: u8) {
-
-}
+pub extern "C" fn irq_handler(_irq: u8) {}

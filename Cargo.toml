@@ -14,13 +14,10 @@ crate-type = ["rlib"]
 cc = { version = "1.0.25", features = [] }
 
 [dependencies]
-bare-metal = { version = "0.2.5", features = [ "const-fn" ] }
+bare-metal = { version = "0.2.5", features = ["const-fn"] }
 
 [dev-dependencies]
 pretty_assertions = "~0.6.1"
-
-[features]
-lm3s6965 = []
 
 [badges]
 travis-ci = { repository = " wizzk42 / armv7-embedded-rust-rt", branch = "master" }

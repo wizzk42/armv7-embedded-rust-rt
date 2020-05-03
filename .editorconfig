@@ -10,7 +10,7 @@ max_line_length = 120
 
 [*.rs]
 insert_final_newline = true
-continuation_indent_size = 8
+continuation_indent_size = 4
 trim_trailing_whitespace = true
 
 [*.s]
